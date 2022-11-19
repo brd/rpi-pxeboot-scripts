@@ -1,0 +1,27 @@
+
+DATE=$( date +%Y%m%d-%H%M%S )
+ZROOT="zroot"
+DEST="/usr/pxeroot"
+# uslcom - For Zooz Z-Wave stick: Silicon Labs CP2102N USB to UART Bridge Controller
+# gpioths - not used anymore, switching to i2c option
+OPTIONS='WITHOUT_AMD=YES WITHOUT_BLACKLIST=YES WITHOUT_BLUETOOTH=YES WITHOUT_CALENDAR=YES WITHOUT_CSH=YES WITHOUT_FREEBSD_UPDATE=YES WITHOUT_IPFILTER=YES WITHOUT_JAIL=YES WITHOUT_LPR=YES WITHOUT_MAIL=y WITHOUT_NIS=YES WITHOUT_NLS=YES WITHOUT_NLS_CATALOGS=YES WITHOUT_PORTSNAP=yes WITHOUT_RCMDS=YES WITHOUT_RCS=YES WITHOUT_SVNLITE=YES WITHOUT_TALK=YES WITHOUT_TESTS=yes WITHOUT_UNBOUND=YES MODULE_LIST="usb ucom uslcom" KERNCONF=GENERIC'
+
+zfs_clone() {
+	DATE=$( cat .latest_test_date )
+	GITHASH=$( cat .latest_test_githash )
+	[ -d ${DEST}/${RPI}-${DATE}-${GITHASH} ] && echo "zfs dataset already exists" && exit 2
+
+	zfs clone ${ZROOT}${DEST}/test-${DATE}-${GITHASH}@clean ${ZROOT}${DEST}/${RPI}-${DATE}-${GITHASH}
+}
+
+zfs_remount() {
+	zfs set mountpoint=${DEST}/${RPI} ${ZROOT}${DEST}/${RPI}-${DATE}-${GITHASH}
+}
+
+nfs_restart() {
+	/etc/rc.d/nfsd restart
+	/etc/rc.d/statd restart
+	/etc/rc.d/lockd restart
+	/etc/rc.d/rpcbind restart
+	/etc/rc.d/mountd reload
+}
