@@ -9,13 +9,13 @@ OPTIONS='WITHOUT_AMD=YES WITHOUT_BLACKLIST=YES WITHOUT_BLUETOOTH=YES WITHOUT_CAL
 zfs_clone() {
 	DATE=$( cat .latest_test_date )
 	GITHASH=$( cat .latest_test_githash )
-	[ -d ${DEST}/${RPI}-${DATE}-${GITHASH} ] && echo "zfs dataset already exists" && exit 2
+	[ -d "${DEST}/${RPI}-${DATE}-${GITHASH}" ] && echo "zfs dataset already exists" && exit 2
 
-	zfs clone ${ZROOT}${DEST}/test-${DATE}-${GITHASH}@clean ${ZROOT}${DEST}/${RPI}-${DATE}-${GITHASH}
+	zfs clone "${ZROOT}${DEST}/test-${DATE}-${GITHASH}@clean" "${ZROOT}${DEST}/${RPI}-${DATE}-${GITHASH}"
 }
 
 zfs_remount() {
-	zfs set mountpoint=${DEST}/${RPI} ${ZROOT}${DEST}/${RPI}-${DATE}-${GITHASH}
+	zfs set mountpoint="${DEST}/${RPI}" "${ZROOT}${DEST}/${RPI}-${DATE}-${GITHASH}"
 }
 
 nfs_restart() {

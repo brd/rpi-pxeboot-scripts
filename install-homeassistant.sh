@@ -7,13 +7,13 @@ RPI="homeassistant"
 zfs_clone
 
 # Configure homeassistant bits
-pw -R ${DESTDIR} useradd homeassistant -w no -m -c "Home Assistant"
-pw -R ${DESTDIR} groupmod dialer -m homeassistant
-HA_UID=$( pw -R ${DESTDIR} showuser homeassistant | awk -F ':' {print $3} )
+pw -R "${DESTDIR}" useradd homeassistant -w no -m -c "Home Assistant"
+pw -R "${DESTDIR}" groupmod dialer -m homeassistant
+HA_UID=$( pw -R "${DESTDIR}" showuser homeassistant | awk -F ':' {print $3} )
 
 # Extra packages
 echo "Installing pkgs.."
-pkg -r ${DESTDIR} -R ${DESTDIR}/etc/pkg -o ABI_FILE=${DESTDIR}/usr/lib/crt1.o install -y \
+pkg -r "${DESTDIR}" -R "${DESTDIR}/etc/pkg" -o ABI_FILE="${DESTDIR}/usr/lib/crt1.o" install -y \
 	devel/py-pip \
 	#www/py-pyjwt2 \
 	multimedia/py-av \
