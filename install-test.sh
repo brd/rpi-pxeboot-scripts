@@ -14,9 +14,9 @@ zfs create "${ZROOT}${DESTDIR}"
 echo
 
 echo 'Installing..'
-eval make -C /usr/src TARGET=arm TARGET_ARCH=armv7 ${OPTIONS} DESTDIR="${DESTDIR}" installworld installkernel
-eval make -C /usr/src TARGET=arm TARGET_ARCH=armv7 ${OPTIONS} DESTDIR="${DESTDIR}" distribution
-eval make -C /usr/src TARGET=arm TARGET_ARCH=armv7 ${OPTIONS} DESTDIR="${DESTDIR}" BATCH_DELETE_OLD_FILES=y delete-old delete-old-libs
+eval make -s -C /usr/src TARGET=arm TARGET_ARCH=armv7 ${OPTIONS} DESTDIR="${DESTDIR}" installworld installkernel
+eval make -s -C /usr/src TARGET=arm TARGET_ARCH=armv7 ${OPTIONS} DESTDIR="${DESTDIR}" distribution
+eval make -s -C /usr/src TARGET=arm TARGET_ARCH=armv7 ${OPTIONS} DESTDIR="${DESTDIR}" BATCH_DELETE_OLD_FILES=y delete-old delete-old-libs
 echo
 
 # Add user
