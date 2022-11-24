@@ -1,15 +1,14 @@
 #/bin/sh -e
 
-. common.shin
-
 RPI="homeassistant"
+. common.shin
 
 zfs_clone
 
 # Configure homeassistant bits
 pw -R "${DESTDIR}" useradd homeassistant -w no -m -c "Home Assistant"
 pw -R "${DESTDIR}" groupmod dialer -m homeassistant
-HA_UID=$( pw -R "${DESTDIR}" showuser homeassistant | awk -F ':' {print $3} )
+HA_UID=$( pw -R "${DESTDIR}" showuser homeassistant | awk -F ':' '{print $3}' )
 
 # Extra packages
 echo "Installing pkgs.."

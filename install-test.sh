@@ -1,23 +1,19 @@
 #/bin/sh -e
 
+RPI=test
 . common.shin
 
-GITHASH=$( git -C /usr/src rev-parse --verify --short HEAD )
-GITBRANCH=$( git -C /usr/src/ branch --show-current | sed -e 's#/#_#' )
-RPI=test
-DESTDIR="${DEST}/${RPI}-${DATE}-${GITBRANCH}-${GITHASH}"
-
-[ -d "${DESTDIR}" ] && echo "zfs dataset already exists" && exit 2
-
-echo "Creating dataset: ${ZROOT}${DESTDIR}.."
-zfs create "${ZROOT}${DESTDIR}"
 echo
+zfs_create
 
 echo 'Installing..'
 eval make -s -C /usr/src TARGET=arm TARGET_ARCH=armv7 ${OPTIONS} DESTDIR="${DESTDIR}" installworld installkernel
 eval make -s -C /usr/src TARGET=arm TARGET_ARCH=armv7 ${OPTIONS} DESTDIR="${DESTDIR}" distribution
 eval make -s -C /usr/src TARGET=arm TARGET_ARCH=armv7 ${OPTIONS} DESTDIR="${DESTDIR}" BATCH_DELETE_OLD_FILES=y delete-old delete-old-libs
 echo
+
+# Configure console
+echo 'console="comconsole"' >> "${DESTDIR}/boot/loader.conf"
 
 # Add user
 echo 'Adding users..'
@@ -33,8 +29,13 @@ cp /home/brd/.zshrc "${DESTDIR}/home/brd"
 echo
 
 # Install pkgs
+echo "Configuring pkg.."
+mkdir -p "${DESTDIR}/usr/local/etc/pkg/repos"
+echo 'od1000: {' > "${DESTDIR}/usr/local/etc/pkg/repos/od1000.conf"
+echo '  url: "http://od1000/packages/131-default",' >> "${DESTDIR}/usr/local/etc/pkg/repos/od1000.conf"
+echo '}' >> "${DESTDIR}/usr/local/etc/pkg/repos/od1000.conf"
 echo "Installing pkgs.."
-pkg -r "${DESTDIR}" -R "${DESTDIR}/etc/pkg" -o ABI_FILE="${DESTDIR}/usr/lib/crt1.o" install -y python lldpd vim tmux net/py-paho-mqtt icinga2 zsh
+pkg -r "${DESTDIR}" -R "${DESTDIR}/usr/local/etc/pkg/repos" -o ABI_FILE="${DESTDIR}/usr/lib/crt1.o" install -y python lldpd vim tmux net/py-paho-mqtt icinga2 zsh
 echo
 
 # Make syslogd wait until lockd starts
