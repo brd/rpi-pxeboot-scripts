@@ -55,7 +55,7 @@ sysrc -f "${DESTDIR}/etc/rc.conf" rpc_lockd_enable="YES"
 # Disable background fsck
 sysrc -f "${DESTDIR}/etc/rc.conf" background_fsck="NO"
 
-# Enable NFS locking
+# Enable LLDPd
 echo '/usr/local/etc/rc.d/lldpd onestart' >> "${DESTDIR}/etc/rc.local"
 
 # Enable NTP
