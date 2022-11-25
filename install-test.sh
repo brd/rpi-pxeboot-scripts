@@ -43,21 +43,19 @@ echo 'Configuring rc.conf..'
 sysrc -f "${DESTDIR}/etc/rc.conf" syslogd_enable="NO"
 echo '/etc/rc.d/syslogd forcestart' >> "${DESTDIR}/etc/rc.local"
 
-# Make devd wait until lockd starts
-sysrc -f "${DESTDIR}/etc/rc.conf" devd_enable="NO"
-echo '/etc/rc.d/devd forcestart' >> "${DESTDIR}/etc/rc.local"
-
-# Make sshd wait until lockd starts
-echo '/etc/rc.d/sshd forcestart' >> "${DESTDIR}/etc/rc.local"
+# Enable sshd
+sysrc -f "${DESTDIR}/etc/rc.conf" sshd_enable="YES"
 
 # Enable NFS locking
 sysrc -f "${DESTDIR}/etc/rc.conf" rpc_lockd_enable="YES"
+sysrc -f "${DESTDIR}/etc/rc.conf" rpc_statd_enable="YES"
 
 # Disable background fsck
 sysrc -f "${DESTDIR}/etc/rc.conf" background_fsck="NO"
+touch "${DESTDIR}/etc/fstab"
 
 # Enable LLDPd
-echo '/usr/local/etc/rc.d/lldpd onestart' >> "${DESTDIR}/etc/rc.local"
+sysrc -f "${DESTDIR}/etc/rc.conf" lldpd_enable="NO"
 
 # Enable NTP
 sysrc -f "${DESTDIR}/etc/rc.conf" ntpd_enable="YES" ntpd_sync_on_start="YES"
