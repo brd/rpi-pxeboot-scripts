@@ -30,7 +30,11 @@ zfs_clone() {
 }
 
 zfs_remount() {
-	zfs set mountpoint="${DEST}/${RPI}" "${ZROOT}${DEST}/${RPI}-${DATE}-${GITHASH}"
+	local _olddate _oldgithash _oldgitbranch
+	_olddate=$( cat .latest_test_date )
+	_oldgithash=$( cat .latest_test_githash )
+	_oldgitbranch=$( cat .latest_test_gitbranch )
+	zfs set mountpoint="${DEST}/${RPI}" "${ZROOT}${DEST}/${RPI}-${_olddate}-${_oldgitbranch}-${_oldgithash}"
 }
 
 nfs_restart() {
