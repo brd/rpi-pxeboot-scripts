@@ -26,6 +26,7 @@ zfs_clone() {
 	DESTDIR="${DEST}/${RPI}-${_olddate}-${_oldgitbranch}-${_oldgithash}"
 	[ -d "${DESTDIR}" ] && echo "zfs dataset already exists" && exit 2
 
+	echo "Cloning ${ZROOT}${_testdir}@clean -> ${ZROOT}${DESTDIR}"
 	zfs send "${ZROOT}${_testdir}@clean" | zfs receive "${ZROOT}${DESTDIR}"
 }
 

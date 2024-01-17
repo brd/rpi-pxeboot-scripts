@@ -1,6 +1,6 @@
 #/bin/sh -e
 
-RPI=test
+RPI="test"
 . common.shin
 
 echo
@@ -10,31 +10,38 @@ echo 'Installing..'
 eval make -s -C /usr/src TARGET=arm TARGET_ARCH=armv7 ${OPTIONS} DESTDIR="${DESTDIR}" installworld installkernel
 eval make -s -C /usr/src TARGET=arm TARGET_ARCH=armv7 ${OPTIONS} DESTDIR="${DESTDIR}" distribution
 eval make -s -C /usr/src TARGET=arm TARGET_ARCH=armv7 ${OPTIONS} DESTDIR="${DESTDIR}" BATCH_DELETE_OLD_FILES=y delete-old delete-old-libs
+echo ${DATE} > .latest_test_date
+echo ${GITHASH} > .latest_test_githash
+echo ${GITBRANCH} > .latest_test_gitbranch
 echo
 
 # Configure console
-echo 'console="comconsole"' >> "${DESTDIR}/boot/loader.conf"
+echo 'console="efi"' >> "${DESTDIR}/boot/loader.conf"
 
 # Add user
 echo 'Adding users..'
 pw -R "${DESTDIR}" useradd brd
 mkdir -p "${DESTDIR}/home/brd/.ssh"
 cp ~brd/.ssh/authorized_keys "${DESTDIR}/home/brd/.ssh/"
-chown -R brd "${DESTDIR}/home/brd"
 chmod -R 700 "${DESTDIR}/home/brd/.ssh"
 chmod 600 "${DESTDIR}/home/brd/.ssh/authorized_keys"
 pw -R "${DESTDIR}" groupmod wheel -m brd
 cp /home/brd/.vimrc "${DESTDIR}/home/brd"
 cp /home/brd/.zshrc "${DESTDIR}/home/brd"
+chown -R brd "${DESTDIR}/home/brd"
 echo
 
 # Install pkgs
 echo "Configuring pkg.."
 mkdir -p "${DESTDIR}/usr/local/etc/pkg/repos"
+echo 'FreeBSD: {' > "${DESTDIR}/usr/local/etc/pkg/repos/FreeBSD.conf"
+echo '  enabled: no,' >> "${DESTDIR}/usr/local/etc/pkg/repos/FreeBSD.conf"
+echo '}' >> "${DESTDIR}/usr/local/etc/pkg/repos/FreeBSD.conf"
 echo 'od1000: {' > "${DESTDIR}/usr/local/etc/pkg/repos/od1000.conf"
-echo '  url: "http://od1000/packages/131-default",' >> "${DESTDIR}/usr/local/etc/pkg/repos/od1000.conf"
+echo '  url: "http://od1000/packages/140-default",' >> "${DESTDIR}/usr/local/etc/pkg/repos/od1000.conf"
 echo '}' >> "${DESTDIR}/usr/local/etc/pkg/repos/od1000.conf"
 echo "Installing pkgs.."
+# XXX this is broken
 pkg -r "${DESTDIR}" -R "${DESTDIR}/usr/local/etc/pkg/repos" -o ABI_FILE="${DESTDIR}/usr/lib/crt1.o" install -y python lldpd vim tmux net/py-paho-mqtt icinga2 zsh
 echo
 
@@ -63,6 +70,14 @@ sed -i'' -e 's/pool .*/#pool /' "${DESTDIR}/etc/ntp.conf"
 echo 'server 192.168.1.31 iburst' > "${DESTDIR}/etc/ntp.conf"
 echo
 
+# Disable periodic services
+echo 'weekly_locate_enable="NO"' >> "${DESTDIR}/etc/perodic.conf"
+echo 'security_status_neggrpperm_enable="NO"' >> "${DESTDIR}/etc/perodic.conf"
+echo 'security_status_chksetuid_enable="NO"' >> "${DESTDIR}/etc/perodic.conf"
+echo 'daily_output="/var/log/daily.log"' >> "${DESTDIR}/etc/perodic.conf"
+echo 'weekly_output="/var/log/weekly.log"' >> "${DESTDIR}/etc/perodic.conf"
+echo 'monthly_output="/var/log/monthly.log"' >> "${DESTDIR}/etc/perodic.conf"
+
 # Configure resolv.conf
 echo 'Configuring resolv.conf..'
 cp /etc/resolv.conf "${DESTDIR}/etc/"
@@ -75,12 +90,9 @@ echo
 
 # Remount
 echo 'Changing mountpoint..'
-zfs set mountpoint=/usr/pxeroot/test "${ZROOT}${DESTDIR}"
+zfs_remount
 nfs_restart
 echo
 
 
 echo 'Done, reboot test RPi'
-echo ${DATE} > .latest_test_date
-echo ${GITHASH} > .latest_test_githash
-echo ${GITBRANCH} > .latest_test_gitbranch
